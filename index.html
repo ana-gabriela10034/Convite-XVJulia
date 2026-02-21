@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Convite Júlia 15 Anos</title>
+
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+
+  body{
+    background:#fff;
+    overflow-x:hidden;
+    overflow-y:auto;
+    font-family: Arial, sans-serif;
+  }
+
+  /* cada capa ocupa a largura toda e rola */
+  .section{
+    width: 100%;
+  }
+
+  /* imagem responsiva, sem tarja preta */
+  .section img{
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  /* capa 1 com “toque para abrir” */
+  .cover{
+    position: relative;
+  }
+
+  /* área clicável invisível (ajuste fino se precisar) */
+  .hit-area{
+    position:absolute;
+    left: 50%;
+    top: 72%;
+    transform: translate(-50%, -50%);
+    width: 70%;
+    height: 18%;
+    background: transparent;
+    cursor: pointer;
+    border: none;
+  }
+
+  /* capa 4 interativa */
+  .contador{ position: relative; }
+  .interativa{ position: relative; }
+
+  .hotspot{
+    position: absolute;
+    cursor: pointer;
+    /* só pra debug: descomenta se quiser ver o tamanho da área */
+    /* background: rgba(255,0,0,0.18); */
+  }
+
+  /* ✅ Ajuste mais para baixo (pra encaixar nos círculos) */
+  .hotspot.confirmar{
+    left: 18%;
+    top: 56%;
+    width: 30%;
+    height: 22%;
+  }
+
+  .hotspot.chegar{
+    left: 52%;
+    top: 56%;
+    width: 30%;
+    height: 22%;
+  }
+
+  /* ✅ NOVO: wrap para TÍTULO + CONTADOR ficarem sempre juntinhos e bem posicionados */
+  .countdown-wrap{
+    position: absolute;
+    left: 50%;
+    top: 22%;                 /* 👈 ajuste fino: sobe/desce TUDO junto */
+    transform: translate(-50%, -50%);
+    z-index: 10;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;                /* espaço entre o título e a contagem */
+  }
+
+  /* ✅ TÍTULO (agora sem position absolute) */
+  .titulo-contagem{
+    margin: 0;
+    text-align: center;
+    font-size: clamp(14px, 2.4vw, 22px);
+    color: #d86b87;
+    letter-spacing: 2px;
+  }
+
+  /* ✅ CONTADOR (agora sem position absolute) */
+  .countdown{
+    display:flex;
+    align-items:flex-end;
+    gap: clamp(6px, 1.2vw, 10px);
+
+    padding: clamp(8px, 1.3vw, 12px) clamp(12px, 2vw, 18px);
+    border-radius: 14px;
+
+    background: rgba(255,255,255,0.28);
+    backdrop-filter: blur(8px);
+
+    color: #e06282;
+  }
+
+  .countdown .num{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+
+  .countdown .num span{
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: 0.5px;
+    font-size: clamp(30px, 5.2vw, 44px);
+  }
+
+  .countdown .num small{
+    margin-top: 6px;
+    font-size: clamp(10px, 1.7vw, 13px);
+    letter-spacing: 1.4px;
+    opacity: .8;
+  }
+
+  .countdown .sep{
+    font-weight: 500;
+    opacity: .4;
+    transform: translateY(-4px);
+    font-size: clamp(22px, 4vw, 34px);
+  }
+</style>
+</head>
+
+<body>
+
+<audio id="music" src="audio/musica.mp3.mp3" preload="auto"></audio>
+
+<!-- CAPA 1 (capa fechada) -->
+<section class="section cover" id="capa1">
+  <img src="imagens/capa1.png" alt="Capa 1">
+  <button class="hit-area" id="btnAbrir" aria-label="Abrir convite"></button>
+</section>
+
+<!-- CONTEÚDO ESTENDIDO (capa2..capa7) -->
+<div id="conteudo" style="display:none;">
+  <section class="section"><img src="imagens/capa2.png" alt="Capa 2"></section>
+  <section class="section"><img src="imagens/capa3.png" alt="Capa 3"></section>
+
+  <!-- ✅ CAPA 4 (interativa + contador) -->
+  <section class="section contador interativa" id="capa4">
+    <img id="imgContador" src="imagens/capa4.png" alt="Interação">
+
+    <!-- Hotspots -->
+    <a class="hotspot confirmar" href="#" aria-label="Confirmar presença"></a>
+    <a class="hotspot chegar" href="#" aria-label="Como chegar"></a>
+
+    <!-- ✅ Título + Contador (AGORA DENTRO DO WRAP) -->
+    <div class="countdown-wrap">
+      <h2 class="titulo-contagem">Contagem regressiva</h2>
+
+      <div class="countdown" id="countdown">
+        <div class="num"><span id="d">00</span><small>DIAS</small></div>
+        <div class="sep">:</div>
+        <div class="num"><span id="h">00</span><small>HORAS</small></div>
+        <div class="sep">:</div>
+        <div class="num"><span id="m">00</span><small>MINUTOS</small></div>
+        <div class="sep">:</div>
+        <div class="num"><span id="s">00</span><small>SEGUNDOS</small></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section"><img src="imagens/capa5.png" alt="Capa 5"></section>
+  <section class="section"><img src="imagens/capa6.png" alt="Capa 6"></section>
+  <section class="section"><img src="imagens/capa7.png" alt="Capa 7"></section>
+</div>
+
+<script>
+  const btn = document.getElementById('btnAbrir');
+  const conteudo = document.getElementById('conteudo');
+  const capa1 = document.getElementById('capa1');
+  const music = document.getElementById('music');
+
+  // ===== Contagem regressiva =====
+  const eventDate = new Date("2026-06-03T18:30:00-03:00");
+  function pad(n){ return String(n).padStart(2,"0"); }
+
+  function updateCountdown(){
+    const now = new Date();
+    let diff = eventDate - now;
+
+    if(diff <= 0){
+      const cd = document.getElementById("countdown");
+      cd.textContent = "Chegou o grande dia! 🎉";
+      cd.style.fontWeight = "700";
+      cd.style.justifyContent = "center";
+      clearInterval(timer);
+      return;
+    }
+
+    const t = Math.floor(diff/1000);
+    const days = Math.floor(t/(3600*24));
+    const hours = Math.floor((t%(3600*24))/3600);
+    const mins = Math.floor((t%3600)/60);
+    const secs = t%60;
+
+    document.getElementById("d").textContent = pad(days);
+    document.getElementById("h").textContent = pad(hours);
+    document.getElementById("m").textContent = pad(mins);
+    document.getElementById("s").textContent = pad(secs);
+  }
+  updateCountdown();
+  const timer = setInterval(updateCountdown, 1000);
+
+  // ===== Abrir convite =====
+  btn.addEventListener('click', () => {
+    conteudo.style.display = 'block';
+
+    music.volume = 0.25;
+    music.play().catch(()=>{});
+
+    capa1.style.display = 'none';
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  });
+
+  // ===== Botões da capa 4 (WhatsApp + Maps) =====
+  const btnConf = document.querySelector(".hotspot.confirmar");
+  const btnChegar = document.querySelector(".hotspot.chegar");
+
+  if(btnConf){
+    btnConf.addEventListener("click", e => {
+      e.preventDefault();
+
+      const numero = "5521976861982"; // ✅ TROCA AQUI (DDI+DDD+NUM, sem espaços)
+
+      const mensagem = encodeURIComponent(
+    "Olá! Gostaria de confirmar minha presença nos 15 anos da Júlia.\n\n" +
+    "Informe o nome completo de todos os convidados que irão comparecer ao evento:\n\n"
+  );
+
+      window.open(`https://wa.me/${numero}?text=${mensagem}`, "_blank");
+    });
+  }
+
+  if(btnChegar){
+    btnChegar.addEventListener("click", e => {
+      e.preventDefault();
+
+      const endereco = encodeURIComponent(
+        "No salão Maias Casa de Festas, Rio de Janeiro - RJ"
+      );
+
+      window.open(
+        `https://www.google.com/maps/search/?api=1&query=${endereco}`,
+        "_blank"
+      );
+    });
+  }
+</script>
+
+</body>
+</html>
+
+
+
